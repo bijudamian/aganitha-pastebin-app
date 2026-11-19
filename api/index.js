@@ -164,7 +164,9 @@ pre{white-space:pre-wrap;word-break:break-word;background:#f5f5f7;padding:16px;b
   // Error handlers go last so body-parser and route errors reach them.
   app.use((error, _req, res, next) => {
     if (res.headersSent) return next(error);
-    if (error?.type === 'entity.parse.failed' || (error instanceof SyntaxError && 'body' in error)) {
+    if (error?.status === 400 || error?.statusCode === 400 ||
+        error?.type === 'entity.parse.failed' ||
+        (error instanceof SyntaxError && 'body' in error)) {
       return res.status(400).json({ error: 'invalid_json' });
     }
     console.error('unhandled request error', error);
