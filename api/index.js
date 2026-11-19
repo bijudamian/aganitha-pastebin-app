@@ -9,9 +9,13 @@ const MAX_TTL_SECONDS = 24 * 60 * 60;
 const MAX_VIEWS = 1000;
 
 function newId() {
-  const bytes = crypto.randomBytes(ID_LENGTH);
   let id = '';
-  for (const b of bytes) id += ID_ALPHABET[b % ID_ALPHABET.length];
+  while (id.length < ID_LENGTH) {
+    for (const b of crypto.randomBytes(ID_LENGTH * 2)) {
+      if (b < 248) id += ID_ALPHABET[b % ID_ALPHABET.length]; // rejection sampling: uniform over 62 chars
+      if (id.length === ID_LENGTH) break;
+    }
+  }
   return id;
 }
 
@@ -66,7 +70,8 @@ export function createApp(sql) {
           RETURNING id, expires_at, max_views, views
         `;
         const row = rows[0];
-        const origin = `${req.protocol}://${req.get('host')}`;
+        // Never derive a share URL from a client-controlled Host header.
+        const origin = process.env.PUBLIC_BASE_URL || `${req.protocol}://${req.get('host')}`;
         return res.status(201).json({
           id: row.id,
           url: `${origin}/${row.id}`,
