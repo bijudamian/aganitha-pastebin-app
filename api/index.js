@@ -1,7 +1,7 @@
 import express from 'express';
 import crypto from 'node:crypto';
 import { neon } from '@neondatabase/serverless';
-import { APPROACH_HTML } from './approach.js';
+import { APPROACH_HTML } from '../approach.js';
 
 const ID_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 const ID_LENGTH = 7;
