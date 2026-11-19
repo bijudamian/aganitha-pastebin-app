@@ -1,5 +1,7 @@
 import express from 'express';
 import crypto from 'node:crypto';
+import fs from 'node:fs';
+import path from 'node:path';
 import { neon } from '@neondatabase/serverless';
 import { APPROACH_HTML } from '../approach.js';
 import { DEMO_HTML } from '../demo.js';
@@ -141,6 +143,19 @@ export function createApp(sql) {
     } catch (error) {
       console.error('read failed', error);
       return res.status(500).json({ error: 'internal_error' });
+    }
+  });
+
+  app.get('/demo-walkthrough.mp4', (_req, res) => {
+    try {
+      const file = path.join(process.cwd(), 'demo-walkthrough.mp4');
+      const data = fs.readFileSync(file);
+      res.setHeader('Content-Type', 'video/mp4');
+      res.setHeader('Cache-Control', 'public, max-age=3600');
+      return res.send(data);
+    } catch (error) {
+      console.error('video read failed', error);
+      return res.status(404).type('text').send('video not found');
     }
   });
 
