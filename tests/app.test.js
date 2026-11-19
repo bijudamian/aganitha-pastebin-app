@@ -82,6 +82,16 @@ test('validation rejects bad input', async () => {
   assert.equal(badTtl.status, 400);
 });
 
+test('malformed JSON returns a JSON error', async () => {
+  const { sql } = fakeDb();
+  const base = await baseUrl(createApp(sql));
+  const res = await fetch(base + '/api/pastes', {
+    method: 'POST', headers: { 'content-type': 'application/json' }, body: '{bad',
+  });
+  assert.equal(res.status, 400);
+  assert.equal((await res.json()).error, 'invalid_json');
+});
+
 test('expiry by time returns 410 and stops content', async () => {
   const { sql } = fakeDb();
   const base = await baseUrl(createApp(sql));

@@ -32,7 +32,14 @@ function escapeHtml(text) {
 export function createApp(sql) {
   const app = express();
   app.disable('x-powered-by');
+  app.set('trust proxy', 1);
   app.use(express.json({ limit: '128kb' }));
+  app.use((error, _req, res, next) => {
+    if (error instanceof SyntaxError && 'body' in error) {
+      return res.status(400).json({ error: 'invalid_json' });
+    }
+    return next(error);
+  });
 
   app.get('/api/health', (_req, res) => res.json({ ok: true }));
 
