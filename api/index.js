@@ -34,12 +34,6 @@ export function createApp(sql) {
   app.disable('x-powered-by');
   app.set('trust proxy', 1);
   app.use(express.json({ limit: '128kb' }));
-  app.use((error, _req, res, next) => {
-    if (error instanceof SyntaxError && 'body' in error) {
-      return res.status(400).json({ error: 'invalid_json' });
-    }
-    return next(error);
-  });
 
   app.get('/api/health', (_req, res) => res.json({ ok: true }));
 
@@ -165,6 +159,16 @@ export function createApp(sql) {
 <style>body{font:16px/1.6 system-ui;margin:2rem auto;max-width:760px;color:#222}
 pre{white-space:pre-wrap;word-break:break-word;background:#f5f5f7;padding:16px;border-radius:8px}</style>
 </head><body><h1>Paste ${escapeHtml(req.params.id)}</h1><pre>${content}</pre></body></html>`);
+  });
+
+  // Error handlers go last so body-parser and route errors reach them.
+  app.use((error, _req, res, next) => {
+    if (res.headersSent) return next(error);
+    if (error?.type === 'entity.parse.failed' || (error instanceof SyntaxError && 'body' in error)) {
+      return res.status(400).json({ error: 'invalid_json' });
+    }
+    console.error('unhandled request error', error);
+    return res.status(500).json({ error: 'internal_error' });
   });
 
   return app;
