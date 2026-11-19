@@ -1,6 +1,7 @@
 import express from 'express';
 import crypto from 'node:crypto';
 import { neon } from '@neondatabase/serverless';
+import { APPROACH_HTML } from './approach.js';
 
 const ID_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 const ID_LENGTH = 7;
@@ -36,6 +37,7 @@ export function createApp(sql) {
   app.use(express.json({ limit: '128kb' }));
 
   app.get('/api/health', (_req, res) => res.json({ ok: true }));
+  app.get('/approach', (_req, res) => res.type('html').send(APPROACH_HTML));
 
   app.post('/api/pastes', async (req, res) => {
     const { content, ttlSeconds, maxViews } = req.body || {};
